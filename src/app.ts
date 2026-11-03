@@ -9,6 +9,7 @@ import { pool } from './db/pool';
 import passport from './config/passport';
 import indexRouter from './routes/indexRouter';
 import authRouter from './routes/authRouter';
+import messageRouter from './routes/messageRouter';
 
 dotenv.config();
 
@@ -70,6 +71,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Routes
 app.use('/', indexRouter);
 app.use('/', authRouter);
+app.use('/', messageRouter);
 
 // 404 Handler
 app.use((req: Request, res: Response) => {

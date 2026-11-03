@@ -1,0 +1,39 @@
+<%- include('partials/header', { title: 'Admin Access' }) %>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>🛡️ Admin Access</h2>
+      <p>Enter the administrator secret passcode to unlock message deletion capabilities.</p>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger" role="alert">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/admin" method="POST" class="auth-form">
+      <div class="form-group">
+        <label for="passcode">Admin Passcode</label>
+        <input
+          type="password"
+          id="passcode"
+          name="passcode"
+          placeholder="Enter the secret admin code"
+          required
+          autofocus
+        >
+        <small class="form-help">Hint for testing: check your <code>ADMIN_PASSCODE</code> in .env (default: <code>admin123</code>)</small>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Enable Admin Privileges</button>
+    </form>
+
+    <div class="auth-footer">
+      <a href="/">← Return to Messages</a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

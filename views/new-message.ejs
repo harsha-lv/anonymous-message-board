@@ -1,0 +1,55 @@
+<%- include('partials/header', { title: 'Create Message' }) %>
+
+<div class="auth-wrapper">
+  <div class="auth-card message-card">
+    <div class="auth-header">
+      <h2>Write a New Message</h2>
+      <p>Share your thoughts with the clubhouse community.</p>
+    </div>
+
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <div class="alert alert-danger" role="alert">
+        <div class="alert-title">Please fix the following:</div>
+        <ul class="error-list">
+          <% errors.forEach(function(error) { %>
+            <li><%= error.msg %></li>
+          <% }); %>
+        </ul>
+      </div>
+    <% } %>
+
+    <form action="/new-message" method="POST" class="auth-form" novalidate>
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          placeholder="e.g. Secret meeting tonight!"
+          value="<%= typeof formData !== 'undefined' && formData.title ? formData.title : '' %>"
+          required
+          autofocus
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="text">Message Text</label>
+        <textarea
+          id="text"
+          name="text"
+          rows="5"
+          placeholder="What would you like to say anonymously?"
+          required
+        ><%= typeof formData !== 'undefined' && formData.text ? formData.text : '' %></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Post Message</button>
+    </form>
+
+    <div class="auth-footer">
+      <a href="/">← Back to Message Board</a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

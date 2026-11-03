@@ -1,54 +1,129 @@
-<%- include('partials/header', { title: 'Welcome' }) %>
+<%- include('partials/header', { title: 'Home' }) %>
 
 <section class="hero-section">
   <div class="hero-card">
     <% if (locals.currentUser) { %>
       <div class="badge status-ok">● Logged in as <%= currentUser.username %></div>
-      <h1>Welcome back, <%= currentUser.full_name %>!</h1>
+      <h1>Welcome, <%= currentUser.full_name %>!</h1>
       <p class="hero-subtitle">
-        Your current membership status: <strong><%= currentUser.membership_status === 'non_member' ? 'Non-Member' : (currentUser.membership_status === 'member' ? 'Club Member' : 'Admin') %></strong>.
-        <% if (currentUser.membership_status === 'non_member') { %>
-          Enter the secret club passcode to unlock author visibility on all messages.
+        <% if (currentUser.is_admin) { %>
+          You have <strong>Administrator</strong> privileges. You can see all authors, dates, and delete any message.
+        <% } else if (currentUser.membership_status === 'member') { %>
+          You are a verified <strong>Club Member</strong>! You have full visibility into message authors and post timestamps.
         <% } else { %>
-          You have full clubhouse privileges to view message authors!
+          You are currently a <strong>Non-Member</strong>. You can post messages, but message authors and dates remain anonymous.
         <% } %>
       </p>
 
       <div class="hero-actions">
+        <a href="/new-message" class="btn btn-primary">Post a Message ✍️</a>
         <% if (currentUser.membership_status === 'non_member') { %>
-          <a href="/join-club" class="btn btn-primary">Join the Club 🔑</a>
+          <a href="/join-club" class="btn btn-secondary">Join Club 🔑</a>
         <% } %>
-        <a href="/new-message" class="btn btn-secondary">Post a Message ✍️</a>
+        <% if (!currentUser.is_admin) { %>
+          <a href="/admin" class="btn btn-secondary">Admin Access 🛡️</a>
+        <% } %>
       </div>
     <% } else { %>
-      <div class="badge status-ok">● System Active</div>
-      <h1>Members-Only Message Board</h1>
+      <div class="badge status-ok">● Anonymous Clubhouse</div>
+      <h1>Anonymous Message Board</h1>
       <p class="hero-subtitle">
-        Post freely and anonymously. Only verified club members can see who wrote each message.
+        Anyone can post anonymous thoughts. Only verified clubhouse members hold the key to see who wrote what.
       </p>
 
       <div class="hero-actions">
         <a href="/login" class="btn btn-primary">Log In</a>
-        <a href="/sign-up" class="btn btn-secondary">Create Account</a>
+        <a href="/sign-up" class="btn btn-secondary">Sign Up</a>
       </div>
     <% } %>
-
-    <div class="status-panel" style="margin-top: 2rem;">
-      <h3>Clubhouse Stats</h3>
-      <div class="status-row">
-        <span>PostgreSQL Status:</span>
-        <strong class="text-success"><%= dbStatus %></strong>
-      </div>
-      <div class="status-row">
-        <span>Total Users:</span>
-        <span><%= userCount %></span>
-      </div>
-      <div class="status-row">
-        <span>Total Messages:</span>
-        <span><%= messageCount %></span>
-      </div>
-    </div>
   </div>
+</section>
+
+<section class="messages-section">
+  <div class="messages-header">
+    <h2>Messages Feed</h2>
+    <span class="message-counter"><%= messages.length %> <%= messages.length === 1 ? 'Message' : 'Messages' %></span>
+  </div>
+
+  <% 
+    const canSeeDetails = locals.currentUser && (
+      locals.currentUser.membership_status === 'member' || 
+      locals.currentUser.membership_status === 'admin' || 
+      locals.currentUser.is_admin
+    );
+
+    const isUserAdmin = locals.currentUser && (
+      locals.currentUser.is_admin || 
+      locals.currentUser.membership_status === 'admin'
+    );
+  %>
+
+  <% if (messages.length === 0) { %>
+    <div class="empty-state">
+      <p>No messages have been posted yet. Be the first to share your thoughts!</p>
+      <% if (locals.currentUser) { %>
+        <a href="/new-message" class="btn btn-primary" style="margin-top: 1rem;">Write the First Message</a>
+      <% } else { %>
+        <a href="/login" class="btn btn-primary" style="margin-top: 1rem;">Log In to Post</a>
+      <% } %>
+    </div>
+  <% } else { %>
+    <div class="messages-list">
+      <% messages.forEach(function(msg) { %>
+        <article class="message-item">
+          <div class="message-main">
+            <h3 class="message-title"><%= msg.title %></h3>
+            <p class="message-body"><%= msg.text %></p>
+          </div>
+
+          <div class="message-footer">
+            <div class="message-meta">
+              <% if (canSeeDetails) { %>
+                <div class="meta-row author-row">
+                  <span class="meta-icon">👤</span>
+                  <span class="meta-label">Author:</span>
+                  <strong><%= msg.full_name || msg.username %></strong>
+                  <span class="meta-handle">(@<%= msg.username %>)</span>
+                </div>
+                <div class="meta-row date-row">
+                  <span class="meta-icon">📅</span>
+                  <time datetime="<%= msg.timestamp %>">
+                    <%= new Date(msg.timestamp).toLocaleDateString(undefined, { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric',
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    }) %>
+                  </time>
+                </div>
+              <% } else { %>
+                <div class="meta-row meta-locked">
+                  <span class="lock-icon">🔒</span>
+                  <span>Author: <em>Hidden (Members Only)</em></span>
+                  &bull;
+                  <span>Date: <em>Hidden</em></span>
+                  <a href="<%= locals.currentUser ? '/join-club' : '/login' %>" class="unlock-hint">
+                    <%= locals.currentUser ? 'Unlock with passcode' : 'Log in to view' %>
+                  </a>
+                </div>
+              <% } %>
+            </div>
+
+            <% if (isUserAdmin) { %>
+              <div class="admin-actions">
+                <form action="/messages/<%= msg.id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this message?');">
+                  <button type="submit" class="btn btn-danger btn-sm" title="Delete this message">
+                    Delete
+                  </button>
+                </form>
+              </div>
+            <% } %>
+          </div>
+        </article>
+      <% }); %>
+    </div>
+  <% } %>
 </section>
 
 <%- include('partials/footer') %>

@@ -15,21 +15,18 @@ export const isGuest = (req: Request, res: Response, next: NextFunction): void =
 };
 
 export const isMember = (req: Request, res: Response, next: NextFunction): void => {
-  if (req.isAuthenticated() && (req.user.membership_status === 'member' || req.user.membership_status === 'admin')) {
+  if (
+    req.isAuthenticated() &&
+    (req.user.membership_status === 'member' || req.user.membership_status === 'admin' || req.user.is_admin)
+  ) {
     return next();
   }
-  res.status(403).render('index', {
-    title: 'Access Denied',
-    dbStatus: 'Club member access only',
-    userCount: '-',
-    messageCount: '-',
-  });
+  res.redirect('/join-club');
 };
 
 export const isAdmin = (req: Request, res: Response, next: NextFunction): void => {
-  if (req.isAuthenticated() && req.user.membership_status === 'admin') {
+  if (req.isAuthenticated() && (req.user.is_admin || req.user.membership_status === 'admin')) {
     return next();
   }
-  res.status(403).send('Forbidden: Admin access required');
+  res.status(403).send('Forbidden: Administrator privileges required to perform this action.');
 };
-

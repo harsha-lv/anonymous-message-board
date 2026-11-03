@@ -8,8 +8,11 @@ const createTablesSQL = `
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     membership_status VARCHAR(50) DEFAULT 'non_member',
+    is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
   );
+
+  ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE;
 
   CREATE TABLE IF NOT EXISTS messages (
     id SERIAL PRIMARY KEY,

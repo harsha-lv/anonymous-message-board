@@ -18,10 +18,17 @@
       </a>
       <nav class="nav-links">
         <% if (locals.currentUser) { %>
+          <a href="/new-message" class="nav-link">+ New Message</a>
+          <% if (currentUser.membership_status === 'non_member') { %>
+            <a href="/join-club" class="nav-link text-primary font-bold">Join Club 🔑</a>
+          <% } %>
+          <% if (!currentUser.is_admin) { %>
+            <a href="/admin" class="nav-link text-muted">Admin 🛡️</a>
+          <% } %>
           <div class="user-pill">
             <span class="user-name"><%= currentUser.full_name %></span>
             <span class="membership-badge badge-<%= currentUser.membership_status %>">
-              <%= currentUser.membership_status === 'non_member' ? 'Non-Member' : (currentUser.membership_status === 'member' ? 'Member' : 'Admin') %>
+              <%= currentUser.is_admin ? 'Admin' : (currentUser.membership_status === 'member' ? 'Member' : 'Non-Member') %>
             </span>
           </div>
           <a href="/logout" class="nav-btn btn-secondary">Log Out</a>
@@ -33,3 +40,17 @@
     </div>
   </header>
   <main class="main-content container">
+    <% if (locals.successMessages && successMessages.length > 0) { %>
+      <div class="alert alert-success" role="alert">
+        <% successMessages.forEach(function(msg) { %>
+          <p><%= msg %></p>
+        <% }); %>
+      </div>
+    <% } %>
+    <% if (locals.errorMessages && errorMessages.length > 0) { %>
+      <div class="alert alert-danger" role="alert">
+        <% errorMessages.forEach(function(msg) { %>
+          <p><%= msg %></p>
+        <% }); %>
+      </div>
+    <% } %>

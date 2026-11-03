@@ -40,7 +40,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id: number, done) => {
   try {
     const result = await db.query<Express.User>(
-      'SELECT id, full_name, username, email, membership_status, created_at FROM users WHERE id = $1',
+      'SELECT id, full_name, username, email, membership_status, is_admin, created_at FROM users WHERE id = $1',
       [id]
     );
 

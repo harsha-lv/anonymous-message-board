@@ -7,6 +7,7 @@ export interface User {
   email: string;
   password?: string;
   membership_status: MembershipStatus;
+  is_admin: boolean;
   created_at?: Date;
 }
 
@@ -16,6 +17,7 @@ export interface Message {
   text: string;
   timestamp: Date;
   username: string;
+  full_name?: string;
 }
 
 declare global {
@@ -26,6 +28,7 @@ declare global {
       username: string;
       email: string;
       membership_status: MembershipStatus;
+      is_admin: boolean;
       created_at?: Date;
     }
   }
