@@ -1,124 +1,117 @@
 <%- include('partials/header', { title: 'Sign Up' }) %>
 
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="auth-header">
-      <h2>Create an Account</h2>
-      <p>Join the community to post messages and discover club secrets.</p>
+<div class="form-card">
+  <h2>Sign Up</h2>
+  <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+    Create an account to post messages and join the clubhouse.
+  </p>
+
+  <% 
+    const errorList = typeof errors !== 'undefined' ? errors : []; 
+    const getFieldError = (fieldName) => errorList.find(e => e.path === fieldName);
+  %>
+
+  <% if (errorList.length > 0) { %>
+    <div class="alert alert-danger" role="alert">
+      <strong>Please correct the following errors:</strong>
+      <ul class="error-list">
+        <% errorList.forEach(function(error) { %>
+          <li><%= error.msg %></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form action="/sign-up" method="POST" novalidate>
+    <div class="form-group">
+      <label for="full_name">Full Name</label>
+      <% const fnErr = getFieldError('full_name'); %>
+      <input
+        type="text"
+        id="full_name"
+        name="full_name"
+        value="<%= typeof formData !== 'undefined' && formData.full_name ? formData.full_name : '' %>"
+        class="<%= fnErr ? 'input-error' : '' %>"
+        required
+      >
+      <% if (fnErr) { %>
+        <span class="field-error"><%= fnErr.msg %></span>
+      <% } %>
     </div>
 
-    <% 
-      const errorList = typeof errors !== 'undefined' ? errors : []; 
-      const getFieldError = (fieldName) => errorList.find(e => e.path === fieldName);
-    %>
-
-    <% if (errorList.length > 0) { %>
-      <div class="alert alert-danger" role="alert">
-        <div class="alert-title">Please correct the following:</div>
-        <ul class="error-list">
-          <% errorList.forEach(function(error) { %>
-            <li><%= error.msg %></li>
-          <% }); %>
-        </ul>
-      </div>
-    <% } %>
-
-    <form action="/sign-up" method="POST" class="auth-form" novalidate>
-      <div class="form-group">
-        <label for="full_name">Full Name</label>
-        <% const fnErr = getFieldError('full_name'); %>
-        <input
-          type="text"
-          id="full_name"
-          name="full_name"
-          placeholder="e.g. Jane Doe"
-          value="<%= typeof formData !== 'undefined' && formData.full_name ? formData.full_name : '' %>"
-          class="<%= fnErr ? 'input-error' : '' %>"
-          required
-        >
-        <% if (fnErr) { %>
-          <span class="field-error"><%= fnErr.msg %></span>
-        <% } %>
-      </div>
-
-      <div class="form-group">
-        <label for="username">Username</label>
-        <% const userErr = getFieldError('username'); %>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder="e.g. janedoe_01"
-          value="<%= typeof formData !== 'undefined' && formData.username ? formData.username : '' %>"
-          class="<%= userErr ? 'input-error' : '' %>"
-          required
-          autocomplete="username"
-        >
-        <% if (userErr) { %>
-          <span class="field-error"><%= userErr.msg %></span>
-        <% } else { %>
-          <small class="form-help">Letters, numbers, underscores, and dashes only.</small>
-        <% } %>
-      </div>
-
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <% const emailErr = getFieldError('email'); %>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="e.g. jane@example.com"
-          value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>"
-          class="<%= emailErr ? 'input-error' : '' %>"
-          required
-          autocomplete="email"
-        >
-        <% if (emailErr) { %>
-          <span class="field-error"><%= emailErr.msg %></span>
-        <% } %>
-      </div>
-
-      <div class="form-group">
-        <label for="password">Password</label>
-        <% const passErr = getFieldError('password'); %>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="At least 6 characters"
-          class="<%= passErr ? 'input-error' : '' %>"
-          required
-          autocomplete="new-password"
-        >
-        <% if (passErr) { %>
-          <span class="field-error"><%= passErr.msg %></span>
-        <% } %>
-      </div>
-
-      <div class="form-group">
-        <label for="confirm_password">Confirm Password</label>
-        <% const confirmErr = getFieldError('confirm_password'); %>
-        <input
-          type="password"
-          id="confirm_password"
-          name="confirm_password"
-          placeholder="Re-enter your password"
-          class="<%= confirmErr ? 'input-error' : '' %>"
-          required
-          autocomplete="new-password"
-        >
-        <% if (confirmErr) { %>
-          <span class="field-error"><%= confirmErr.msg %></span>
-        <% } %>
-      </div>
-
-      <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
-    </form>
-
-    <div class="auth-footer">
-      Already have an account? <a href="/login">Log In</a>
+    <div class="form-group">
+      <label for="username">Username</label>
+      <% const userErr = getFieldError('username'); %>
+      <input
+        type="text"
+        id="username"
+        name="username"
+        value="<%= typeof formData !== 'undefined' && formData.username ? formData.username : '' %>"
+        class="<%= userErr ? 'input-error' : '' %>"
+        required
+        autocomplete="username"
+      >
+      <% if (userErr) { %>
+        <span class="field-error"><%= userErr.msg %></span>
+      <% } else { %>
+        <span class="form-help">Letters, numbers, underscores, and dashes only.</span>
+      <% } %>
     </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <% const emailErr = getFieldError('email'); %>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>"
+        class="<%= emailErr ? 'input-error' : '' %>"
+        required
+        autocomplete="email"
+      >
+      <% if (emailErr) { %>
+        <span class="field-error"><%= emailErr.msg %></span>
+      <% } %>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <% const passErr = getFieldError('password'); %>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        class="<%= passErr ? 'input-error' : '' %>"
+        required
+        autocomplete="new-password"
+      >
+      <% if (passErr) { %>
+        <span class="field-error"><%= passErr.msg %></span>
+      <% } %>
+    </div>
+
+    <div class="form-group">
+      <label for="confirm_password">Confirm Password</label>
+      <% const confirmErr = getFieldError('confirm_password'); %>
+      <input
+        type="password"
+        id="confirm_password"
+        name="confirm_password"
+        class="<%= confirmErr ? 'input-error' : '' %>"
+        required
+        autocomplete="new-password"
+      >
+      <% if (confirmErr) { %>
+        <span class="field-error"><%= confirmErr.msg %></span>
+      <% } %>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+  </form>
+
+  <div class="form-footer">
+    Already have an account? <a href="/login">Log In</a>
   </div>
 </div>
 

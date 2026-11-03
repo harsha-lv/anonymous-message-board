@@ -31,3 +31,4 @@ router.get('/admin', isAuthenticated, getAdmin);
 router.post('/admin', isAuthenticated, postAdmin);
 
 export default router;
+

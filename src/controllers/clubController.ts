@@ -88,3 +88,4 @@ export const postAdmin = async (req: Request, res: Response, next: NextFunction)
     next(err);
   }
 };
+

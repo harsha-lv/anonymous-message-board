@@ -1,62 +1,55 @@
 <%- include('partials/header', { title: 'Log In' }) %>
 
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="auth-header">
-      <h2>Welcome Back</h2>
-      <p>Enter your credentials to access your clubhouse account.</p>
+<div class="form-card">
+  <h2>Log In</h2>
+  <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+    Enter your username and password.
+  </p>
+
+  <% if (typeof registered !== 'undefined' && registered) { %>
+    <div class="alert alert-success" role="alert">
+      Account created. Please log in below.
+    </div>
+  <% } %>
+
+  <% if (typeof errorMessages !== 'undefined' && errorMessages.length > 0) { %>
+    <div class="alert alert-danger" role="alert">
+      <% errorMessages.forEach(function(msg) { %>
+        <div><%= msg %></div>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <form action="/login" method="POST">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input
+        type="text"
+        id="username"
+        name="username"
+        required
+        autocomplete="username"
+        autofocus
+      >
     </div>
 
-    <% if (typeof registered !== 'undefined' && registered) { %>
-      <div class="alert alert-success" role="alert">
-        Account created successfully! Please log in below.
-      </div>
-    <% } %>
-
-    <% if (typeof errorMessages !== 'undefined' && errorMessages.length > 0) { %>
-      <div class="alert alert-danger" role="alert">
-        <ul class="error-list">
-          <% errorMessages.forEach(function(msg) { %>
-            <li><%= msg %></li>
-          <% }); %>
-        </ul>
-      </div>
-    <% } %>
-
-    <form action="/login" method="POST" class="auth-form">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder="Your username"
-          required
-          autocomplete="username"
-          autofocus
-        >
-      </div>
-
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Your password"
-          required
-          autocomplete="current-password"
-        >
-      </div>
-
-      <button type="submit" class="btn btn-primary btn-block">Log In</button>
-    </form>
-
-    <div class="auth-footer">
-      Don't have an account? <a href="/sign-up">Sign Up</a>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        required
+        autocomplete="current-password"
+      >
     </div>
+
+    <button type="submit" class="btn btn-primary btn-block">Log In</button>
+  </form>
+
+  <div class="form-footer">
+    Don't have an account? <a href="/sign-up">Sign Up</a>
   </div>
 </div>
 
 <%- include('partials/footer') %>
-

@@ -1,38 +1,34 @@
-<%- include('partials/header', { title: 'Join the Club' }) %>
+<%- include('partials/header', { title: 'Join Club' }) %>
 
-<div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="auth-header">
-      <h2>🔑 Join the Secret Club</h2>
-      <p>Enter the club passcode to unlock author and timestamp visibility on all messages.</p>
+<div class="form-card">
+  <h2>Join Club</h2>
+  <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+    Enter the club secret passcode to view message authors and timestamps.
+  </p>
+
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger" role="alert">
+      <%= error %>
+    </div>
+  <% } %>
+
+  <form action="/join-club" method="POST">
+    <div class="form-group">
+      <label for="passcode">Club Passcode</label>
+      <input
+        type="password"
+        id="passcode"
+        name="passcode"
+        required
+        autofocus
+      >
     </div>
 
-    <% if (typeof error !== 'undefined' && error) { %>
-      <div class="alert alert-danger" role="alert">
-        <%= error %>
-      </div>
-    <% } %>
+    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+  </form>
 
-    <form action="/join-club" method="POST" class="auth-form">
-      <div class="form-group">
-        <label for="passcode">Club Passcode</label>
-        <input
-          type="password"
-          id="passcode"
-          name="passcode"
-          placeholder="Enter the secret club code"
-          required
-          autofocus
-        >
-        <small class="form-help">Hint for testing: check your <code>CLUB_PASSCODE</code> in .env (default: <code>club123</code>)</small>
-      </div>
-
-      <button type="submit" class="btn btn-primary btn-block">Unlock Membership</button>
-    </form>
-
-    <div class="auth-footer">
-      <a href="/">← Return to Messages</a>
-    </div>
+  <div class="form-footer">
+    <a href="/">Back to Messages</a>
   </div>
 </div>
 
