@@ -2,14 +2,39 @@
 
 <section class="hero-section">
   <div class="hero-card">
-    <div class="badge status-ok">● System Active</div>
-    <h1>Members-Only Message Board</h1>
-    <p class="hero-subtitle">
-      Post freely and anonymously. Only verified club members can see who wrote each message.
-    </p>
+    <% if (locals.currentUser) { %>
+      <div class="badge status-ok">● Logged in as <%= currentUser.username %></div>
+      <h1>Welcome back, <%= currentUser.full_name %>!</h1>
+      <p class="hero-subtitle">
+        Your current membership status: <strong><%= currentUser.membership_status === 'non_member' ? 'Non-Member' : (currentUser.membership_status === 'member' ? 'Club Member' : 'Admin') %></strong>.
+        <% if (currentUser.membership_status === 'non_member') { %>
+          Enter the secret club passcode to unlock author visibility on all messages.
+        <% } else { %>
+          You have full clubhouse privileges to view message authors!
+        <% } %>
+      </p>
 
-    <div class="status-panel">
-      <h3>Database Connection Status</h3>
+      <div class="hero-actions">
+        <% if (currentUser.membership_status === 'non_member') { %>
+          <a href="/join-club" class="btn btn-primary">Join the Club 🔑</a>
+        <% } %>
+        <a href="/new-message" class="btn btn-secondary">Post a Message ✍️</a>
+      </div>
+    <% } else { %>
+      <div class="badge status-ok">● System Active</div>
+      <h1>Members-Only Message Board</h1>
+      <p class="hero-subtitle">
+        Post freely and anonymously. Only verified club members can see who wrote each message.
+      </p>
+
+      <div class="hero-actions">
+        <a href="/login" class="btn btn-primary">Log In</a>
+        <a href="/sign-up" class="btn btn-secondary">Create Account</a>
+      </div>
+    <% } %>
+
+    <div class="status-panel" style="margin-top: 2rem;">
+      <h3>Clubhouse Stats</h3>
       <div class="status-row">
         <span>PostgreSQL Status:</span>
         <strong class="text-success"><%= dbStatus %></strong>
@@ -23,12 +48,7 @@
         <span><%= messageCount %></span>
       </div>
     </div>
-
-    <div class="hero-actions">
-      <span class="info-tag">Part 1 Setup Complete: Ready for Part 2 Authentication</span>
-    </div>
   </div>
 </section>
 
 <%- include('partials/footer') %>
-

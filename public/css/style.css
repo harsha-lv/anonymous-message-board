@@ -387,3 +387,25 @@ body {
   background: #fef3c7;
   color: #92400e;
 }
+
+/* Hero Actions & General Buttons */
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  font-family: inherit;
+  text-align: center;
+}
