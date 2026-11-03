@@ -61,3 +61,4 @@ export const validateSignUpRules = [
   // Dedicated custom validator middleware for password confirmation
   validateConfirmPassword,
 ];
+

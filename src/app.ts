@@ -1,7 +1,10 @@
 import path from 'path';
 import express, { Request, Response, NextFunction } from 'express';
+import session from 'express-session';
+import flash from 'connect-flash';
 import dotenv from 'dotenv';
 
+import passport from './config/passport';
 import indexRouter from './routes/indexRouter';
 import authRouter from './routes/authRouter';
 
@@ -18,14 +21,37 @@ const publicPath = path.resolve(process.cwd(), 'public');
 app.set('views', viewsPath);
 app.set('view engine', 'ejs');
 
-// Middleware
+// Body parsers and static files
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(publicPath));
 
-// Global variables for templates
+// Session configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'clubhouse_secret_key_123',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    },
+  })
+);
+
+// Flash messages
+app.use(flash());
+
+// Passport authentication
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Global template variables
 app.use((req: Request, res: Response, next: NextFunction) => {
-  res.locals.currentUser = null; // Will be populated in Part 2 auth
+  res.locals.currentUser = req.user || null;
+  res.locals.errorMessages = req.flash('error');
+  res.locals.successMessages = req.flash('success');
   next();
 });
 
@@ -56,4 +82,3 @@ if (require.main === module) {
 }
 
 export default app;
-

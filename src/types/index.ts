@@ -5,7 +5,7 @@ export interface User {
   full_name: string;
   username: string;
   email: string;
-  password: string;
+  password?: string;
   membership_status: MembershipStatus;
   created_at?: Date;
 }
@@ -18,3 +18,15 @@ export interface Message {
   username: string;
 }
 
+declare global {
+  namespace Express {
+    interface User {
+      id: number;
+      full_name: string;
+      username: string;
+      email: string;
+      membership_status: MembershipStatus;
+      created_at?: Date;
+    }
+  }
+}

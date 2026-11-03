@@ -18,7 +18,12 @@
       </a>
       <nav class="nav-links">
         <% if (locals.currentUser) { %>
-          <span class="nav-greeting">Hi, <%= currentUser.full_name %> (<%= currentUser.membership_status %>)</span>
+          <div class="user-pill">
+            <span class="user-name"><%= currentUser.full_name %></span>
+            <span class="membership-badge badge-<%= currentUser.membership_status %>">
+              <%= currentUser.membership_status === 'non_member' ? 'Non-Member' : (currentUser.membership_status === 'member' ? 'Member' : 'Admin') %>
+            </span>
+          </div>
           <a href="/logout" class="nav-btn btn-secondary">Log Out</a>
         <% } else { %>
           <a href="/login" class="nav-link">Log In</a>
@@ -28,4 +33,3 @@
     </div>
   </header>
   <main class="main-content container">
-

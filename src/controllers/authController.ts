@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import { validationResult } from 'express-validator';
 import db from '../db/pool';
+import passport from '../config/passport';
 import { validateSignUpRules } from '../middleware/authValidator';
 
 // Export validation rules
@@ -51,4 +52,29 @@ export const postSignUp = async (req: Request, res: Response, next: NextFunction
     console.error('Error during user registration:', err);
     next(err);
   }
+};
+
+// GET: Render login form
+export const getLogin = (req: Request, res: Response): void => {
+  res.render('login', {
+    title: 'Log In',
+    registered: req.query.registered === 'true',
+  });
+};
+
+// POST: Authenticate user using Passport LocalStrategy
+export const postLogin = passport.authenticate('local', {
+  successRedirect: '/',
+  failureRedirect: '/login',
+  failureFlash: true,
+});
+
+// GET / POST: Log out user
+export const getLogout = (req: Request, res: Response, next: NextFunction): void => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect('/');
+  });
 };

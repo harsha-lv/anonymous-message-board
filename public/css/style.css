@@ -339,3 +339,51 @@ body {
   font-weight: 500;
   margin-top: 0.15rem;
 }
+
+/* Success Alert */
+.alert-success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  font-weight: 500;
+}
+
+/* User Pill in Header */
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f1f5f9;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.membership-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-non_member {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.badge-member {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-admin {
+  background: #fef3c7;
+  color: #92400e;
+}
