@@ -19,15 +19,23 @@ const createTablesSQL = `
     username VARCHAR(100) NOT NULL REFERENCES users(username) ON UPDATE CASCADE ON DELETE CASCADE
   );
 
+  CREATE TABLE IF NOT EXISTS "session" (
+    "sid" VARCHAR NOT NULL COLLATE "default",
+    "sess" JSON NOT NULL,
+    "expire" TIMESTAMP(6) NOT NULL,
+    CONSTRAINT "session_pkey" PRIMARY KEY ("sid")
+  );
+
   CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp DESC);
   CREATE INDEX IF NOT EXISTS idx_messages_username ON messages(username);
+  CREATE INDEX IF NOT EXISTS idx_session_expire ON "session"("expire");
 `;
 
 async function initDb(): Promise<void> {
   console.log('Connecting to PostgreSQL to initialize schema (TS)...');
   try {
     await pool.query(createTablesSQL);
-    console.log('Database initialized successfully: "users" and "messages" tables are ready.');
+    console.log('Database initialized successfully: "users", "messages", and "session" tables are ready.');
   } catch (err) {
     console.error('Error initializing database schema:', err);
     process.exit(1);
@@ -37,4 +45,3 @@ async function initDb(): Promise<void> {
 }
 
 initDb();
-

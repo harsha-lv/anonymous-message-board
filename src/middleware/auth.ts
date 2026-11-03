@@ -32,3 +32,4 @@ export const isAdmin = (req: Request, res: Response, next: NextFunction): void =
   }
   res.status(403).send('Forbidden: Admin access required');
 };
+
