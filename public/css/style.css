@@ -321,3 +321,21 @@ body {
 .error-list li:last-child {
   margin-bottom: 0;
 }
+
+/* Field Level Validation Errors */
+.form-group input.input-error {
+  border-color: var(--danger);
+  background-color: #fffaf0;
+}
+
+.form-group input.input-error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 0.15rem;
+}
