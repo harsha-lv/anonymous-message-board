@@ -1,0 +1,95 @@
+<%- include('partials/header', { title: 'Sign Up' }) %>
+
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Create an Account</h2>
+      <p>Join the community to post messages and discover club secrets.</p>
+    </div>
+
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <div class="alert alert-danger" role="alert">
+        <div class="alert-title">Please correct the following:</div>
+        <ul class="error-list">
+          <% errors.forEach(function(error) { %>
+            <li><%= error.msg %></li>
+          <% }); %>
+        </ul>
+      </div>
+    <% } %>
+
+    <form action="/sign-up" method="POST" class="auth-form" novalidate>
+      <div class="form-group">
+        <label for="full_name">Full Name</label>
+        <input
+          type="text"
+          id="full_name"
+          name="full_name"
+          placeholder="e.g. Jane Doe"
+          value="<%= typeof formData !== 'undefined' && formData.full_name ? formData.full_name : '' %>"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="e.g. janedoe_01"
+          value="<%= typeof formData !== 'undefined' && formData.username ? formData.username : '' %>"
+          required
+          autocomplete="username"
+        >
+        <small class="form-help">Letters, numbers, underscores, and dashes only.</small>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="e.g. jane@example.com"
+          value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>"
+          required
+          autocomplete="email"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="At least 6 characters"
+          required
+          autocomplete="new-password"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">Confirm Password</label>
+        <input
+          type="password"
+          id="confirm_password"
+          name="confirm_password"
+          placeholder="Re-enter your password"
+          required
+          autocomplete="new-password"
+        >
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="/login">Log In</a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+

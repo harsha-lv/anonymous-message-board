@@ -1,0 +1,34 @@
+<%- include('partials/header', { title: 'Welcome' }) %>
+
+<section class="hero-section">
+  <div class="hero-card">
+    <div class="badge status-ok">● System Active</div>
+    <h1>Members-Only Message Board</h1>
+    <p class="hero-subtitle">
+      Post freely and anonymously. Only verified club members can see who wrote each message.
+    </p>
+
+    <div class="status-panel">
+      <h3>Database Connection Status</h3>
+      <div class="status-row">
+        <span>PostgreSQL Status:</span>
+        <strong class="text-success"><%= dbStatus %></strong>
+      </div>
+      <div class="status-row">
+        <span>Total Users:</span>
+        <span><%= userCount %></span>
+      </div>
+      <div class="status-row">
+        <span>Total Messages:</span>
+        <span><%= messageCount %></span>
+      </div>
+    </div>
+
+    <div class="hero-actions">
+      <span class="info-tag">Part 1 Setup Complete: Ready for Part 2 Authentication</span>
+    </div>
+  </div>
+</section>
+
+<%- include('partials/footer') %>
+
