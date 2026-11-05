@@ -1,59 +1,72 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcryptjs';
+
 import db from '../db/pool';
-import { User } from '../types';
+import type { UserProfile, UserRecord } from '../types';
+
+const toUserProfile = (user: UserRecord): Express.User => ({
+  id: user.id,
+  full_name: user.full_name,
+  username: user.username,
+  email: user.email,
+  membership_status: user.membership_status,
+  is_admin: user.is_admin,
+  created_at: user.created_at,
+});
 
 passport.use(
-  new LocalStrategy(async (username, password, done) => {
+  new LocalStrategy(async (username: string, password: string, done): Promise<void> => {
     try {
-      const result = await db.query<User & { password: string }>(
+      const result = await db.query<UserRecord>(
         'SELECT * FROM users WHERE LOWER(username) = LOWER($1)',
         [username]
       );
 
       const user = result.rows[0];
 
-      if (!user) {
-        return done(null, false, { message: 'Incorrect username.' });
+      if (user === undefined) {
+        done(null, false, { message: 'Incorrect username.' });
+        return;
       }
 
-      // Secure verification comparing hashed password with bcrypt
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return done(null, false, { message: 'Incorrect password.' });
+        done(null, false, { message: 'Incorrect password.' });
+        return;
       }
 
-      // Exclude password hash from the user object in memory
-      const { password: _, ...authenticatedUser } = user;
-      return done(null, authenticatedUser);
-    } catch (err) {
-      return done(err);
+      done(null, toUserProfile(user));
+    } catch (error) {
+      done(error);
     }
   })
 );
 
-passport.serializeUser((user, done) => {
+passport.serializeUser((user: Express.User, done): void => {
   done(null, user.id);
 });
 
-passport.deserializeUser(async (id: number, done) => {
+passport.deserializeUser(async (id: number, done): Promise<void> => {
   try {
-    const result = await db.query<Express.User>(
-      'SELECT id, full_name, username, email, membership_status, is_admin, created_at FROM users WHERE id = $1',
+    const result = await db.query<UserProfile>(
+      `SELECT id, full_name, username, email, membership_status, is_admin, created_at
+       FROM users
+       WHERE id = $1`,
       [id]
     );
 
     const user = result.rows[0];
-    if (!user) {
-      return done(null, false);
+
+    if (user === undefined) {
+      done(null, false);
+      return;
     }
 
     done(null, user);
-  } catch (err) {
-    done(err);
+  } catch (error) {
+    done(error);
   }
 });
 
 export default passport;
-

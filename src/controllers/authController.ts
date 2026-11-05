@@ -1,80 +1,120 @@
-import { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { validationResult } from 'express-validator';
+
 import db from '../db/pool';
+import { getViolatedConstraint, isUniqueViolation } from '../db/errors';
 import passport from '../config/passport';
 import { validateSignUpRules } from '../middleware/authValidator';
+import { getFormErrors } from '../utils/validation';
+import type {
+  FormError,
+  LoginViewModel,
+  SignUpBody,
+  SignUpFormData,
+  SignUpViewModel,
+} from '../types';
 
-// Export validation rules
+const BCRYPT_SALT_ROUNDS = 10;
+
 export const validateSignUp = validateSignUpRules;
 
-// GET: Render sign-up form
-export const getSignUp = (req: Request, res: Response): void => {
-  res.render('sign-up', {
+export const getSignUp = (_req: Request, res: Response): void => {
+  const viewModel: SignUpViewModel = {
     title: 'Sign Up',
     errors: [],
     formData: {},
-  });
+  };
+
+  res.render('sign-up', viewModel);
 };
 
-// POST: Process sign-up submission
-export const postSignUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const errors = validationResult(req);
-  const { full_name, username, email, password } = req.body;
+export const postSignUp = async (req: Request, res: Response): Promise<void> => {
+  const body = req.body as SignUpBody;
+  const formData: SignUpFormData = {
+    full_name: body.full_name,
+    username: body.username,
+    email: body.email,
+  };
 
-  if (!errors.isEmpty()) {
-    res.status(400).render('sign-up', {
-      title: 'Sign Up',
-      errors: errors.array(),
-      formData: {
-        full_name,
-        username,
-        email,
-      },
-    });
+  const errors = getFormErrors(req);
+
+  if (errors.length > 0) {
+    const viewModel: SignUpViewModel = { title: 'Sign Up', errors, formData };
+    res.status(400).render('sign-up', viewModel);
     return;
   }
 
   try {
-    // Hash password with bcrypt salt rounds = 10
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(body.password, BCRYPT_SALT_ROUNDS);
 
-    // Default membership status: 'non_member'
     await db.query(
       `INSERT INTO users (full_name, username, email, password, membership_status)
        VALUES ($1, $2, $3, $4, 'non_member')`,
-      [full_name, username, email, hashedPassword]
+      [body.full_name, body.username, body.email, hashedPassword]
     );
 
-    // Redirect to login page upon success
     res.redirect('/login?registered=true');
-  } catch (err) {
-    console.error('Error during user registration:', err);
-    next(err);
+  } catch (error: unknown) {
+    console.error('Error during user registration:', error);
+
+    if (isUniqueViolation(error)) {
+      const constraint = getViolatedConstraint(error);
+      const isUsername = constraint.includes('username');
+      const isEmail = constraint.includes('email');
+
+      const fieldError: FormError = isUsername
+        ? { path: 'username', msg: 'Username is already taken.' }
+        : isEmail
+          ? { path: 'email', msg: 'Email address is already registered.' }
+          : { path: 'username', msg: 'An account with those details already exists.' };
+
+      const viewModel: SignUpViewModel = {
+        title: 'Sign Up',
+        errors: [fieldError],
+        formData,
+      };
+
+      res.status(400).render('sign-up', viewModel);
+      return;
+    }
+
+    // Anything else (for example, the database being unreachable) is a server
+    // failure, not a problem with the submitted fields.
+    const viewModel: SignUpViewModel = {
+      title: 'Sign Up',
+      errors: [{
+        path: '',
+        msg: 'We could not create your account right now. Please try again in a moment.',
+      }],
+      formData,
+    };
+
+    res.status(500).render('sign-up', viewModel);
   }
 };
 
-// GET: Render login form
 export const getLogin = (req: Request, res: Response): void => {
-  res.render('login', {
+  const viewModel: LoginViewModel = {
     title: 'Log In',
     registered: req.query.registered === 'true',
-  });
+  };
+
+  res.render('login', viewModel);
 };
 
-// POST: Authenticate user using Passport LocalStrategy
-export const postLogin = passport.authenticate('local', {
+export const postLogin: RequestHandler = passport.authenticate('local', {
   successRedirect: '/',
   failureRedirect: '/login',
   failureFlash: true,
 });
 
-// GET / POST: Log out user
 export const getLogout = (req: Request, res: Response, next: NextFunction): void => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
+  req.logout((error) => {
+    if (error) {
+      next(error);
+      return;
     }
+
     res.redirect('/');
   });
 };

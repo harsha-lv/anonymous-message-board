@@ -1,34 +1,33 @@
-import { Pool, QueryResult, QueryResultRow } from 'pg';
-import dotenv from 'dotenv';
+import '../config/env';
+import { Pool, type PoolConfig, type QueryResult, type QueryResultRow } from 'pg';
+import { config } from '../config/env';
 
-dotenv.config();
+const poolConfig: PoolConfig = config.database.url
+  ? {
+      connectionString: config.database.url,
+      ssl: config.isProduction ? { rejectUnauthorized: false } : false,
+    }
+  : {
+      host: config.database.host,
+      port: config.database.port,
+      user: config.database.user,
+      password: config.database.password,
+      database: config.database.database,
+    };
 
-const isProduction = process.env.NODE_ENV === 'production';
+export const pool = new Pool(poolConfig);
 
-export const pool = process.env.DATABASE_URL
-  ? new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: isProduction ? { rejectUnauthorized: false } : false,
-    })
-  : new Pool({
-      host: process.env.PGHOST || 'localhost',
-      port: process.env.PGPORT ? parseInt(process.env.PGPORT, 10) : 5432,
-      user: process.env.PGUSER || 'postgres',
-      password: process.env.PGPASSWORD || '',
-      database: process.env.PGDATABASE || 'anonymous_message_board',
-    });
-
-pool.on('error', (err: Error) => {
-  console.error('Unexpected error on idle database client', err);
+pool.on('error', (error: Error): void => {
+  console.error('Unexpected error on idle database client:', error);
 });
 
-export const query = <R extends QueryResultRow = any>(
+export const query = <R extends QueryResultRow = QueryResultRow>(
   text: string,
-  params?: any[]
-): Promise<QueryResult<R>> => pool.query<R>(text, params);
+  params?: readonly unknown[]
+): Promise<QueryResult<R>> => pool.query<R>(text, params as unknown[] | undefined);
 
-export default {
-  query,
-  pool,
-};
+export const closePool = (): Promise<void> => pool.end();
 
+const db = { query, pool, closePool };
+
+export default db;

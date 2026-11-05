@@ -1,4 +1,5 @@
 import { Router } from 'express';
+
 import {
   getNewMessage,
   postNewMessage,
@@ -13,7 +14,7 @@ import {
 } from '../controllers/clubController';
 import { isAuthenticated, isAdmin } from '../middleware/auth';
 
-const router = Router();
+const router: Router = Router();
 
 // Message creation
 router.get('/new-message', isAuthenticated, getNewMessage);
@@ -31,4 +32,3 @@ router.get('/admin', isAuthenticated, getAdmin);
 router.post('/admin', isAuthenticated, postAdmin);
 
 export default router;
-

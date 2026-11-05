@@ -1,4 +1,4 @@
-import { pool } from './pool';
+import db from './pool';
 
 const createTablesSQL = `
   CREATE TABLE IF NOT EXISTS users (
@@ -34,17 +34,20 @@ const createTablesSQL = `
   CREATE INDEX IF NOT EXISTS idx_session_expire ON "session"("expire");
 `;
 
-async function initDb(): Promise<void> {
-  console.log('Connecting to PostgreSQL to initialize schema (TS)...');
-  try {
-    await pool.query(createTablesSQL);
-    console.log('Database initialized successfully: "users", "messages", and "session" tables are ready.');
-  } catch (err) {
-    console.error('Error initializing database schema:', err);
-    process.exit(1);
-  } finally {
-    await pool.end();
-  }
-}
+export const initDb = async (): Promise<void> => {
+  console.log('Connecting to PostgreSQL to initialize schema...');
 
-initDb();
+  try {
+    await db.query(createTablesSQL);
+    console.log('Database initialized successfully: "users", "messages", and "session" tables are ready.');
+  } finally {
+    await db.closePool();
+  }
+};
+
+if (require.main === module) {
+  void initDb().catch((error: unknown) => {
+    console.error('Error initializing database schema:', error);
+    process.exitCode = 1;
+  });
+}

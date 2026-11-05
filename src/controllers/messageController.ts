@@ -1,76 +1,74 @@
-import { Request, Response, NextFunction } from 'express';
-import { body, validationResult } from 'express-validator';
+import type { Request, Response } from 'express';
+
 import db from '../db/pool';
+import { validateMessageRules } from '../middleware/authValidator';
+import { asyncHandler } from '../utils/asyncHandler';
+import { getFormErrors } from '../utils/validation';
+import type {
+  NewMessageBody,
+  NewMessageFormData,
+  NewMessageViewModel,
+} from '../types';
 
-export const validateMessage = [
-  body('title')
-    .trim()
-    .notEmpty().withMessage('Message title is required.')
-    .isLength({ min: 1, max: 255 }).withMessage('Title must be between 1 and 255 characters.'),
+export const validateMessage = validateMessageRules;
 
-  body('text')
-    .trim()
-    .notEmpty().withMessage('Message text is required.')
-    .isLength({ min: 1, max: 5000 }).withMessage('Message text must be between 1 and 5000 characters.'),
-];
-
-// GET: Render new message form
-export const getNewMessage = (req: Request, res: Response): void => {
-  res.render('new-message', {
+export const getNewMessage = (_req: Request, res: Response): void => {
+  const viewModel: NewMessageViewModel = {
     title: 'Create Message',
     errors: [],
     formData: {},
-  });
+  };
+
+  res.render('new-message', viewModel);
 };
 
-// POST: Save new message to database
-export const postNewMessage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const errors = validationResult(req);
-  const { title, text } = req.body;
+export const postNewMessage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const body = req.body as NewMessageBody;
+  const formData: NewMessageFormData = { title: body.title, text: body.text };
+  const errors = getFormErrors(req);
 
-  if (!errors.isEmpty()) {
-    return res.status(400).render('new-message', {
+  if (errors.length > 0) {
+    const viewModel: NewMessageViewModel = {
       title: 'Create Message',
-      errors: errors.array(),
-      formData: { title, text },
-    });
+      errors,
+      formData,
+    };
+
+    res.status(400).render('new-message', viewModel);
+    return;
   }
 
-  try {
-    if (!req.user) {
-      return res.redirect('/login');
-    }
+  if (!req.user) {
+    res.redirect('/login');
+    return;
+  }
 
-    await db.query(
-      'INSERT INTO messages (title, text, username) VALUES ($1, $2, $3)',
-      [title, text, req.user.username]
-    );
+  await db.query(
+    'INSERT INTO messages (title, text, username) VALUES ($1, $2, $3)',
+    [body.title, body.text, req.user.username]
+  );
 
-    req.flash('success', 'Message posted successfully!');
+  req.flash('success', 'Message posted successfully!');
+  res.redirect('/');
+});
+
+export const deleteMessage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const rawId = req.params.id;
+  const id = Number.parseInt(Array.isArray(rawId) ? (rawId[0] ?? '') : (rawId ?? ''), 10);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    req.flash('error', 'Message not found.');
     res.redirect('/');
-  } catch (err) {
-    console.error('Error creating message:', err);
-    next(err);
+    return;
   }
-};
 
-// POST: Delete message by ID (Admin only)
-export const deleteMessage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { id } = req.params;
+  const result = await db.query('DELETE FROM messages WHERE id = $1', [id]);
 
-  try {
-    const result = await db.query('DELETE FROM messages WHERE id = $1', [id]);
-
-    if (result.rowCount === 0) {
-      req.flash('error', 'Message not found.');
-    } else {
-      req.flash('success', 'Message deleted successfully.');
-    }
-
-    res.redirect('/');
-  } catch (err) {
-    console.error('Error deleting message:', err);
-    next(err);
+  if ((result.rowCount ?? 0) === 0) {
+    req.flash('error', 'Message not found.');
+  } else {
+    req.flash('success', 'Message deleted successfully.');
   }
-};
 
+  res.redirect('/');
+});

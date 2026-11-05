@@ -1,91 +1,91 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
+
+import { config } from '../config/env';
 import db from '../db/pool';
+import { asyncHandler } from '../utils/asyncHandler';
+import type { PasscodeBody, PasscodeViewModel } from '../types';
 
-const CLUB_PASSCODE = process.env.CLUB_PASSCODE || 'club123';
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'admin123';
-
-// GET: Render Join Club passcode page
 export const getJoinClub = (req: Request, res: Response): void => {
   if (req.user && (req.user.membership_status === 'member' || req.user.is_admin)) {
-    return res.redirect('/');
+    res.redirect('/');
+    return;
   }
-  res.render('join-club', {
+
+  const viewModel: PasscodeViewModel = {
     title: 'Join the Club',
     error: null,
-  });
+  };
+
+  res.render('join-club', viewModel);
 };
 
-// POST: Verify club secret passcode
-export const postJoinClub = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { passcode } = req.body;
+export const postJoinClub = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { passcode } = req.body as PasscodeBody;
 
-  if (passcode !== CLUB_PASSCODE) {
-    return res.status(400).render('join-club', {
+  if (passcode !== config.passcodes.club) {
+    const viewModel: PasscodeViewModel = {
       title: 'Join the Club',
       error: 'Incorrect club passcode. Please try again.',
-    });
+    };
+
+    res.status(400).render('join-club', viewModel);
+    return;
   }
 
-  try {
-    if (!req.user) {
-      return res.redirect('/login');
-    }
-
-    await db.query(
-      "UPDATE users SET membership_status = 'member' WHERE id = $1",
-      [req.user.id]
-    );
-
-    // Update session user
-    req.user.membership_status = 'member';
-    req.flash('success', '🎉 Welcome to the Club! You can now view all message authors and post dates.');
-    res.redirect('/');
-  } catch (err) {
-    console.error('Error updating membership status:', err);
-    next(err);
+  if (!req.user) {
+    res.redirect('/login');
+    return;
   }
-};
 
-// GET: Render Admin passcode page
+  await db.query(
+    "UPDATE users SET membership_status = 'member' WHERE id = $1",
+    [req.user.id]
+  );
+
+  req.user.membership_status = 'member';
+  req.flash('success', '🎉 Welcome to the Club! You can now view all message authors and post dates.');
+  res.redirect('/');
+});
+
 export const getAdmin = (req: Request, res: Response): void => {
-  if (req.user && req.user.is_admin) {
-    return res.redirect('/');
+  if (req.user?.is_admin) {
+    res.redirect('/');
+    return;
   }
-  res.render('admin-access', {
+
+  const viewModel: PasscodeViewModel = {
     title: 'Admin Access',
     error: null,
-  });
+  };
+
+  res.render('admin-access', viewModel);
 };
 
-// POST: Verify admin secret passcode
-export const postAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const { passcode } = req.body;
+export const postAdmin = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { passcode } = req.body as PasscodeBody;
 
-  if (passcode !== ADMIN_PASSCODE) {
-    return res.status(400).render('admin-access', {
+  if (passcode !== config.passcodes.admin) {
+    const viewModel: PasscodeViewModel = {
       title: 'Admin Access',
       error: 'Incorrect admin passcode. Access denied.',
-    });
+    };
+
+    res.status(400).render('admin-access', viewModel);
+    return;
   }
 
-  try {
-    if (!req.user) {
-      return res.redirect('/login');
-    }
-
-    await db.query(
-      "UPDATE users SET is_admin = TRUE, membership_status = 'admin' WHERE id = $1",
-      [req.user.id]
-    );
-
-    // Update session user
-    req.user.is_admin = true;
-    req.user.membership_status = 'admin';
-    req.flash('success', '🛡️ Administrator privileges granted! You can now delete messages.');
-    res.redirect('/');
-  } catch (err) {
-    console.error('Error elevating user to admin:', err);
-    next(err);
+  if (!req.user) {
+    res.redirect('/login');
+    return;
   }
-};
 
+  await db.query(
+    "UPDATE users SET is_admin = TRUE, membership_status = 'admin' WHERE id = $1",
+    [req.user.id]
+  );
+
+  req.user.is_admin = true;
+  req.user.membership_status = 'admin';
+  req.flash('success', '🛡️ Administrator privileges granted! You can now delete messages.');
+  res.redirect('/');
+});
