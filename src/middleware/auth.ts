@@ -33,7 +33,7 @@ export const isMember = (req: Request, res: Response, next: NextFunction): void 
     return;
   }
 
-  res.redirect('/join-club');
+  res.redirect('/membership');
 };
 
 export const isAdmin = (req: Request, res: Response, next: NextFunction): void => {

@@ -43,7 +43,7 @@ export interface AppConfig {
   readonly sessionSecret: string;
   readonly database: DatabaseConfig;
   readonly passcodes: {
-    readonly club: string;
+    readonly member: string;
     readonly admin: string;
   };
 }
@@ -52,7 +52,7 @@ export const config: AppConfig = {
   nodeEnv,
   isProduction: nodeEnv === 'production',
   port: readInteger('PORT', 3000),
-  sessionSecret: readString('SESSION_SECRET', 'clubhouse_secret_key_123'),
+  sessionSecret: readString('SESSION_SECRET', 'anonymous_message_board_secret_key'),
   database: {
     url: process.env.DATABASE_URL?.trim() || undefined,
     host: readString('PGHOST', 'localhost'),
@@ -62,7 +62,7 @@ export const config: AppConfig = {
     database: readString('PGDATABASE', 'anonymous_message_board'),
   },
   passcodes: {
-    club: readString('CLUB_PASSCODE', 'club123'),
+    member: readString('MEMBER_PASSCODE', 'member123'),
     admin: readString('ADMIN_PASSCODE', 'admin123'),
   },
 };

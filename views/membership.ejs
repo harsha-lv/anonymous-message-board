@@ -1,9 +1,9 @@
-<%- include('partials/header', { title: 'Join Club' }) %>
+<%- include('partials/header', { title: 'Become a Member' }) %>
 
 <div class="form-card">
-  <h2>Join Club</h2>
+  <h2>Become a Member</h2>
   <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-    Enter the club secret passcode to view message authors and timestamps.
+    Enter the member passcode to unlock posting and view message authors and timestamps.
   </p>
 
   <% if (typeof error !== 'undefined' && error) { %>
@@ -12,9 +12,9 @@
     </div>
   <% } %>
 
-  <form action="/join-club" method="POST">
+  <form action="/membership" method="POST">
     <div class="form-group">
-      <label for="passcode">Club Passcode</label>
+      <label for="passcode">Member Passcode</label>
       <input
         type="password"
         id="passcode"
@@ -24,7 +24,7 @@
       >
     </div>
 
-    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+    <button type="submit" class="btn btn-primary btn-block">Activate Membership</button>
   </form>
 
   <div class="form-footer">

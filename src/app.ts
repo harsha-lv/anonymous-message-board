@@ -37,7 +37,7 @@ app.use(
       tableName: 'session',
       createTableIfMissing: true,
     }),
-    name: 'clubhouse.sid',
+    name: 'anonymous_board.sid',
     secret: config.sessionSecret,
     resave: false,
     saveUninitialized: false,

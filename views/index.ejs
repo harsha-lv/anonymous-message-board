@@ -2,20 +2,22 @@
 
 <section class="page-intro">
   <% if (locals.currentUser) { %>
+    <% const isMemberUser = currentUser.is_admin || currentUser.membership_status === 'member' || currentUser.membership_status === 'admin'; %>
     <h1>Welcome, <%= currentUser.full_name %></h1>
     <p>
       <% if (currentUser.is_admin) { %>
-        Administrator privileges active. You can see author details and delete messages.
-      <% } else if (currentUser.membership_status === 'member') { %>
-        Club member privileges active. You can view message authors and post dates.
+        Administrator privileges active. You can post, view authors and dates, and delete messages.
+      <% } else if (isMemberUser) { %>
+        Member privileges active. You can post messages and view authors and dates.
       <% } else { %>
-        Non-member status. You can post messages, but author names and dates remain hidden until you join the club.
+        You can read messages. Become a member to post messages and view authors and dates.
       <% } %>
     </p>
     <div class="intro-actions">
-      <a href="/new-message" class="btn btn-primary">New Post</a>
-      <% if (currentUser.membership_status === 'non_member') { %>
-        <a href="/join-club" class="btn btn-secondary">Join Club</a>
+      <% if (isMemberUser) { %>
+        <a href="/new-message" class="btn btn-primary">New Post</a>
+      <% } else { %>
+        <a href="/membership" class="btn btn-primary">Become a Member</a>
       <% } %>
       <% if (!currentUser.is_admin) { %>
         <a href="/admin" class="btn btn-secondary">Admin Access</a>
@@ -23,7 +25,7 @@
     </div>
   <% } else { %>
     <h1>Anonymous Message Board</h1>
-    <p>Post messages anonymously. Only verified club members can view authors and timestamps.</p>
+    <p>Read messages anonymously. Members can post messages and see authors and timestamps.</p>
     <div class="intro-actions">
       <a href="/login" class="btn btn-primary">Log In</a>
       <a href="/sign-up" class="btn btn-secondary">Sign Up</a>
@@ -79,8 +81,8 @@
               <% } else { %>
                 <span class="meta-hidden">
                   Author and date hidden &middot;
-                  <a href="<%= locals.currentUser ? '/join-club' : '/login' %>">
-                    <%= locals.currentUser ? 'Join club to reveal' : 'Log in to view' %>
+                  <a href="<%= locals.currentUser ? '/membership' : '/login' %>">
+                    <%= locals.currentUser ? 'Become a member to reveal' : 'Log in to view' %>
                   </a>
                 </span>
               <% } %>
