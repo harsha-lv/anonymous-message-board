@@ -49,12 +49,22 @@ export const validateSignUpRules: ValidationChain[] = [
     .normalizeEmail(),
 
   body('password')
+    .isString()
+    .withMessage('Password must be a string.')
+    .bail()
     .notEmpty()
     .withMessage('Password is required.')
     .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long.'),
+    .withMessage('Password must be at least 6 characters long.')
+    .custom((password: string) => Buffer.byteLength(password, 'utf8') <= 72)
+    .withMessage('Password must be no more than 72 bytes long.'),
 
   validateConfirmPassword,
+];
+
+export const validateLoginRules: ValidationChain[] = [
+  body('username').isString().bail().trim().notEmpty(),
+  body('password').isString().bail().notEmpty(),
 ];
 
 /** Validation chain for the message creation form. */

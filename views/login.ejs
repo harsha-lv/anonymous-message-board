@@ -12,14 +12,6 @@
     </div>
   <% } %>
 
-  <% if (typeof errorMessages !== 'undefined' && errorMessages.length > 0) { %>
-    <div class="alert alert-danger" role="alert">
-      <% errorMessages.forEach(function(msg) { %>
-        <div><%= msg %></div>
-      <% }); %>
-    </div>
-  <% } %>
-
   <form action="/login" method="POST">
     <div class="form-group">
       <label for="username">Username</label>

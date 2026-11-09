@@ -20,19 +20,19 @@ passport.use(
     try {
       const result = await db.query<UserRecord>(
         'SELECT * FROM users WHERE LOWER(username) = LOWER($1)',
-        [username]
+        [username.trim()]
       );
 
       const user = result.rows[0];
 
       if (user === undefined) {
-        done(null, false, { message: 'Incorrect username.' });
+        done(null, false, { message: 'Incorrect username or password.' });
         return;
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        done(null, false, { message: 'Incorrect password.' });
+        done(null, false, { message: 'Incorrect username or password.' });
         return;
       }
 

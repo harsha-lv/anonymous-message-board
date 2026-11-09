@@ -88,6 +88,14 @@ a:hover {
   color: var(--text);
 }
 
+.logout-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
 .nav-user {
   color: var(--text);
   font-weight: 500;

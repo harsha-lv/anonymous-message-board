@@ -16,6 +16,10 @@ import type { HomeViewModel } from './types';
 
 const app = express();
 
+// TLS is commonly terminated by the deployment platform's reverse proxy.
+// Trust only the configured number of hops so secure session cookies work.
+app.set('trust proxy', config.trustProxy);
+
 // Resolve views and public directories relative to this file so the app works
 // regardless of the directory it is launched from.
 const viewsPath = path.resolve(__dirname, '../views');
@@ -84,8 +88,33 @@ app.use((error: unknown, _req: Request, res: Response, _next: NextFunction): voi
 });
 
 if (require.main === module) {
+  const databaseTarget = ((): string => {
+    if (!config.database.url) {
+      return `${config.database.host}:${config.database.port}/${config.database.database}`;
+    }
+
+    try {
+      return new URL(config.database.url).host;
+    } catch {
+      return 'DATABASE_URL';
+    }
+  })();
+
   app.listen(config.port, (): void => {
     console.log(`Server is running at http://localhost:${config.port}`);
+    console.log(`Database target: ${databaseTarget}`);
+
+    void pool
+      .query('SELECT 1')
+      .then((): void => {
+        console.log('Database connection: OK');
+      })
+      .catch((error: unknown): void => {
+        console.error(
+          'Database connection: FAILED -',
+          error instanceof Error ? error.message : error
+        );
+      });
   });
 }
 

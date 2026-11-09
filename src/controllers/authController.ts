@@ -1,9 +1,11 @@
 import type { NextFunction, Request, RequestHandler, Response } from 'express';
 import bcrypt from 'bcryptjs';
+import { validationResult } from 'express-validator';
 
 import db from '../db/pool';
 import { getViolatedConstraint, isUniqueViolation } from '../db/errors';
 import passport from '../config/passport';
+import { config } from '../config/env';
 import { validateSignUpRules } from '../middleware/authValidator';
 import { getFormErrors } from '../utils/validation';
 import type {
@@ -102,11 +104,22 @@ export const getLogin = (req: Request, res: Response): void => {
   res.render('login', viewModel);
 };
 
-export const postLogin: RequestHandler = passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login',
-  failureFlash: true,
-});
+export const postLogin: RequestHandler = (req, res, next): void => {
+  if (!validationResult(req).isEmpty()) {
+    req.flash('error', 'Please enter your username and password.');
+    req.session.save((error) => {
+      if (error) return next(error);
+      res.redirect('/login');
+    });
+    return;
+  }
+
+  passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true,
+  })(req, res, next);
+};
 
 export const getLogout = (req: Request, res: Response, next: NextFunction): void => {
   req.logout((error) => {
@@ -115,6 +128,19 @@ export const getLogout = (req: Request, res: Response, next: NextFunction): void
       return;
     }
 
-    res.redirect('/');
+    req.session.destroy((destroyError) => {
+      if (destroyError) {
+        next(destroyError);
+        return;
+      }
+
+      res.clearCookie('anonymous_board.sid', {
+        path: '/',
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: config.isProduction,
+      });
+      res.redirect('/');
+    });
   });
 };

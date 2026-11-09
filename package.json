@@ -4,6 +4,7 @@
   "description": "Anonymous message board with restricted author visibility for members",
   "main": "dist/app.js",
   "scripts": {
+    "test": "tsx --test tests/*.test.ts",
     "build": "tsc",
     "start": "node dist/app.js",
     "dev": "tsx watch src/app.ts",
